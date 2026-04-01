@@ -1,5 +1,5 @@
 // Problem 2 - estimate delivery time per package
-function calculateShipment(packages, max_carriable_weight) {
+function calculateDelivery(packages, max_carriable_weight) {
   const results = [];
 
   function backtrack(start, current, totalWeight) {
@@ -30,22 +30,26 @@ function calculateShipment(packages, max_carriable_weight) {
     return distanceA - distanceB;
   });
 
-  return results[0];
+  return results.length > 0 ? results[0] : [];
 }
 
 function assignDeliveries(
   packages,
-  number_of_vehicles,
+  no_of_vehicles,
   max_speed,
   max_carriable_weight,
 ) {
-  const vehicles = new Array(number_of_vehicles).fill(0);
+  const vehicles = new Array(no_of_vehicles).fill(0);
   const remainingPackages = [...packages];
 
   while (remainingPackages.length > 0) {
-    const shipment = calculateShipment(remainingPackages, max_carriable_weight);
+    const delivery = calculateDelivery(remainingPackages, max_carriable_weight);
 
-    shipment.forEach((pkg) => {
+    if (!delivery || delivery.length === 0) {
+      break; // nothing more can be processed
+    }
+
+    delivery.forEach((pkg) => {
       const index = remainingPackages.findIndex((p) => p.id === pkg.id);
       remainingPackages.splice(index, 1);
     });
@@ -53,10 +57,10 @@ function assignDeliveries(
     const vehicleIndex = vehicles.indexOf(Math.min(...vehicles));
     const startTime = vehicles[vehicleIndex];
 
-    const maxDistance = Math.max(...shipment.map((p) => p.distance));
+    const maxDistance = Math.max(...delivery.map((p) => p.distance));
     const tripTime = maxDistance / max_speed;
 
-    shipment.forEach((pkg) => {
+    delivery.forEach((pkg) => {
       pkg.estimated_delivery_time_in_hours = formatTime(
         startTime + pkg.distance / max_speed,
       );
